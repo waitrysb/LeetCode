@@ -1,10 +1,10 @@
 # Strategy
 
-1.求**子串**或者**平台（子数组）**等连续子集问题一般可以使用滑动窗口，如[第3题无重复字母最长子串](https://leetcode.com/problems/longest-substring-without-repeating-characters/)和[第424题最长重复字符替换子串](https://leetcode.com/problems/longest-repeating-character-replacement/)
+1.求**子串**或者**平台（子数组）**等连续子集问题或者**有序数字对（需要先排序）**一般可以使用滑动窗口，如[第3题无重复字母最长子串](https://leetcode.com/problems/longest-substring-without-repeating-characters/)和[第424题最长重复字符替换子串](https://leetcode.com/problems/longest-repeating-character-replacement/)和[532题距离为k的数字对](https://leetcode.com/problems/k-diff-pairs-in-an-array/)
 
 2.遇到可以拆分为子问题的题目，一般递归都可以解决，更好的做法是使用动态规划，如[5题最长回文子串](https://leetcode.com/problems/longest-palindromic-substring/)，[10题正则表达式](https://leetcode.com/problems/regular-expression-matching/)和[808题取汤](<https://leetcode.com/problems/soup-servings/>)(动态规划递归解决方案)
 
-3.**数组的前后**有顺序关系，一般都可以使用首尾指针来解决，保持有序还可以保证没有重复（如果输出是数组的话），如[11题面积最大的平台](https://leetcode.com/problems/container-with-most-water/)和[15题三数之和](https://leetcode.com/problems/3sum/)
+3.**数组的前后**有顺序关系，一般都可以使用首尾指针来解决，保持有序还可以保证没有重复（如果输出是数组的话），如[11题面积最大的平台](https://leetcode.com/problems/container-with-most-water/)和[15题三数之和](https://leetcode.com/problems/3sum/)，还有一些题比较隐晦，如[462题求使数组元素都相等的最小操作次数](https://leetcode.com/problems/minimum-moves-to-equal-array-elements-ii/)，首尾指针同步更新，求出指针的距离和
 
 4.使用**优先队列**可以保证时间复杂度为O(logn)的插入删除操作，常用在**排序**中，如[23题合并k个有序链表](https://leetcode.com/problems/merge-k-sorted-lists/)
 
@@ -22,7 +22,7 @@
 
 11.给定了固定的n个整数，要将其按照某种顺序排好，可以考虑使用索引形成环，然后环中元素交换来分解环，并以此来排序，如[765题数字相邻](<https://leetcode.com/problems/couples-holding-hands/>)和[数学归纳法证明](<https://leetcode.com/problems/couples-holding-hands/discuss/113362/JavaC%2B%2B-O(N)-solution-using-cyclic-swapping>)
 
-12.二叉搜索树在中序遍历下有顺序，可以直接当做一个有序序列来看待，如[501题找二叉搜索树的众数](<https://leetcode.com/problems/find-mode-in-binary-search-tree/>)
+12.**二叉搜索树在中序遍历下有顺序**，可以直接当做一个有序序列来看待，如[501题找二叉搜索树的众数](<https://leetcode.com/problems/find-mode-in-binary-search-tree/>)，很多关于二叉搜索树的问题都可以变成**有序数组**的问题，如[99题修复二叉搜索树](https://leetcode.com/problems/recover-binary-search-tree/)
 
 13.遇到数学问题相关的一定要先推导出公式再动手编码，如[829题连续正整数和](<https://leetcode.com/problems/consecutive-numbers-sum/solution/>)
 
@@ -36,8 +36,19 @@
 
 指针法：交换问题，两数问题，子串、子数组(连续)
 
-移位运算：加减乘除问题，异或运算可以用来实现查重(注意异或交换元素时两个元素都指向同一个地址的情况)
+移位运算：加减乘除问题，异或运算可以用来实现查重(注意异或交换元素时两个元素都指向同一个地址的情况)，n = n & (n-1)可以把n二进制最右边的1置为0
+
+二进制与或非：关于二进制比特的题
 
 16.统计符合某种规律的序列的个数一般可以用dfs或者bfs来做，dfs使用递归，bfs则还需要一个队列，为了保证不重复，可以使用used布尔数组，也可以使用元素交换(固定数组，更快)，如[526求数字与下标有关的所有排列数](<https://leetcode.com/problems/beautiful-arrangement/>)
 
-17.如果要求的最值只与数组中两个元素的位置有关，与其他元素无关，可以先求出第一个元素的所有可能位置，然后贪心遍历第二个元素位置即可，如[962题求两元素最大宽度](<https://leetcode.com/problems/maximum-width-ramp/>)
+17.如果要求的最值只与数组中两个元素的位置有关，与其他元素无关，可以先求出第一个元素的所有可能位置，可以使用栈来存储，因为这些可能元素往往会有顺序比如大小关系，然后贪心遍历第二个元素位置即可，如[962题求两元素最大宽度](<https://leetcode.com/problems/maximum-width-ramp/>)
+
+18.关于多个连通图或者多棵树的问题可以使用并查集来解决，特别是当给出的并不是整个图而是图中元素坐标时，如[947题数岛屿问题](<https://leetcode.com/problems/most-stones-removed-with-same-row-or-column/>)
+
+19.如果要求的是子序列问题，即保证相对顺序，可以使用栈来存储，因为栈有顺序性，如[316题求最小字典序独特字符子序列](https://leetcode.com/problems/remove-duplicate-letters/)
+
+20.关于链表的题可以考虑使用快慢指针来做，如[876求链表的中间元素](https://leetcode.com/problems/middle-of-the-linked-list/)
+
+21.如果需要对一个二元组排序，可以考虑将二元编码为一元，然后排序，如char、int可以编码为(char - 'a') + int * 100
+

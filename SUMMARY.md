@@ -2136,6 +2136,7 @@ public int jump(int[] nums) {
        }
      }
      return intervals;
+   }
    ```
 
 ### 57. Insert Interval(Hard)
@@ -2508,10 +2509,12 @@ class Solution {
           int len = matrix.length;
           int max = 0;
           while(len > 0) {
+              //从i，j这个点开始看
               for(int i = 0; i + len - 1 < matrix.length; i++) {
                   int temp = 0;
                   for(int j = 0; j < matrix[0].length; j++) {
                       boolean is_rec = true;
+                      //向下延伸的len个点全为1
                       for(int k = i; k < i + len; k++) {
                           if(matrix[k][j] == '0') {
                               is_rec = false;
@@ -2528,11 +2531,11 @@ class Solution {
           }
           return max;
       }
-  }
+}
   ```
 
   * 解法2：使用动态规划
-
+  
     ```
     [
        ["1","0","1","0","1"],
@@ -2556,9 +2559,9 @@ class Solution {
     当hight与目标最大矩形区域的最短的height重合时, 最大矩形的面积就找到了, 如上面的例子, 就是点(2,3)或(2,4)对应的height
     
     i = 0	：1 0 1 0 1	：1 = 0 0 2 0 4
-    i = 1 ：1 0 1 1 1	：l = 0 0 2 2 4
+  	i = 1 ：1 0 1 1 1	：l = 0 0 2 2 4
     ```
-
+  
     ```c++
     class Solution {
       public:
@@ -4100,6 +4103,1490 @@ class Solution {
     return res;
   }
   ```
+
+### 524. Longest Word in Dictionary through Deleting(Medium)
+
+- 题意：给定字符串s和字符串数组d，找到d中最长中字典序最小的能通过s删掉一些字符得到的字符串
+
+- 解法：逐个比较，判断d中每个字符串是否可以由s构造出来，找到需要的那个
+
+  ```java
+  class Solution {
+      public String findLongestWord(String s, List<String> d) {
+          String res = "";
+          for(String str: d) {
+              if(isFormedString(s, str) && (str.length() > res.length() || (str.length() == res.length() && res.compareTo(str) > 0))) {
+                  res = str;
+              }
+          }
+          return res;
+      }
+      
+      private boolean isFormedString(String s, String d) {
+          int i = 0;
+          int j = 0;
+          while(i < s.length() && j < d.length()) {
+              if(s.charAt(i) == d.charAt(j)) {
+                  i++;
+                  j++;
+              } else {
+                  i++;
+              }
+          }
+          return j == d.length();
+      }
+  }
+  ```
+
+### 200. Number of Islands(Medium)
+
+- 题意：给定字符二维数组，1表示陆地，0表示海洋，求有多少块陆地
+
+- 解法：使用图的遍历算法即可，使用dfs可以用递归，代码量更少
+
+  ```java
+  public int numIslands(char[][] grid) {
+      int count=0;
+      for(int i=0;i<grid.length;i++)
+          for(int j=0;j<grid[0].length;j++){
+              if(grid[i][j]=='1'){
+                  dfsFill(grid,i,j);
+                  count++;
+              }
+          }
+      return count;
+  }
+  private void dfsFill(char[][] grid,int i, int j){
+      if(i>=0 && j>=0 && i<grid.length && j<grid[0].length&&grid[i][j]=='1'){
+          grid[i][j]='0';
+          dfsFill(grid, i + 1, j);
+          dfsFill(grid, i - 1, j);
+          dfsFill(grid, i, j + 1);
+          dfsFill(grid, i, j - 1);
+      }
+  }
+  ```
+
+### 738. Monotone Increasing Digits(Medium)
+
+- 题意：给定N，找到不大于N的所有数中数字按照非减顺序排列的最大数字
+
+- 解法：拿到数字后观察规律，发现如果找到了一个逆序对last，temp后，last之后所有的数字都会置为9，last-1，然后再重新向前比较，直到满足条件，为此需要计算last和temp，通过计算位数来确定
+
+  > 使用字符串数组操作可能更加直观String.valueOf(N).toCharArray()，但是牺牲了空间复杂度
+
+  ```java
+  class Solution {
+      public int monotoneIncreasingDigits(int N) {
+          int n = N;
+          int num = 0;
+          int x = 1;
+          while(n > 0) {
+              n /= 10;
+              x *= 10;
+              num++;
+          }
+          if(num == 1) {
+              return N;
+          }
+          x /= 100;
+          n = N;
+          int last = (n / (10 * x)) % 10;
+          int temp = (n / x) % 10;
+          while(last <= temp && x > 1) {
+              x /= 10;
+              last = (n / (10 * x)) % 10;
+              temp = (n / x) % 10;
+          }
+          while(last > temp) {
+              x *= 10;
+              n = n / x * x - 1;
+              last = (n / (10 * x)) % 10;
+              temp = (n / x) % 10;
+          }
+          return n;
+      }
+  }
+  ```
+
+### 947. Most Stones Removed with Same Row or Column(Medium)
+
+- 题意：给定有石头的坐标位置stones，每次可以移除一个在同一行或者同一列有其他石头的石头，最多能移除多少个石头
+
+- 解法1：使用深度搜索，深度搜索中的结点数决定了移除石头的数目，这是因为深度搜索使用visited数组确保不会重复，按照深度也保证了问题的最优解
+
+  > 这里实际上是数岛屿问题，相当于有几个数岛屿，每个岛屿最后会剩下最后一块石头，所有结果就是石头数-岛屿数
+
+  ```java
+  class Solution {
+      // Ans = # of stones – # of islands
+      public int removeStones(int[][] stones) {
+          Set<int[]> visited = new HashSet();
+          int numOfIslands = 0;
+          for (int[] s1:stones){
+              if (!visited.contains(s1)){
+                 dfs(s1, visited, stones); 
+                 numOfIslands++;
+              }
+          }
+          return stones.length - numOfIslands;
+      }
+      
+      private void dfs(int[] s1, Set<int[]> visited, int[][] stones){
+          visited.add(s1);
+          for (int[] s2: stones){
+              if (!visited.contains(s2)){
+  				// stone with same row or column. group them into island
+                  if (s1[0] == s2[0] || s1[1] == s2[1])
+                      dfs(s2, visited, stones);
+              }
+          }
+      }
+  }
+  ```
+
+- 解法2：对于这种连通图问题，一般使用并查集，首先每个石头都是一个集合，然后将石头集合按照规则进行合并，最后剩下的几个集合即为岛屿
+
+  > 可以将行和列进行分别处理，将列数重新映射
+
+  ```java
+  class Solution {
+      //集合的组下标映射
+      Map<Integer, Integer> f = new HashMap<>();
+      int islands = 0;
+  
+      public int removeStones(int[][] stones) {
+          //对每个石头都进行并查集的合并
+          for (int i = 0; i < stones.length; ++i)
+              union(stones[i][0], ~stones[i][1]);
+          return stones.length - islands;
+      }
+  
+      //根据映射表找到x的组下标
+      public int find(int x) {
+          //如果是第一次加入则作为一个新集合
+          if (f.putIfAbsent(x, x) == null)
+              islands++;
+          //由于x组下标在union函数中可能进行了更新，所以需要再递归更新组下标
+          //需要保证不会陷入死循环
+          if (x != f.get(x))
+              f.put(x, find(f.get(x)));
+          //返回最新的x组下标
+          return f.get(x);
+      }
+  
+      //给定横纵坐标，合并横纵坐标对应的组
+      public void union(int x, int y) {
+          //首先找到横纵坐标对应的组下标
+          x = find(x);
+          y = find(y);
+          //如果不是同一组则集合数-1
+          //并且将横坐标组下标映射到纵坐标组下标
+          if (x != y) {
+              f.put(x, y);
+              islands--;
+          }
+      }
+  }
+  ```
+
+### 189. Gray Code(Medium)
+
+- 题意：给定二进制位数n，求出格雷码(相邻元素只有一位不同)
+
+- 解法：使用二进制或运算，借助元素的顺序性，可以将上一次求得的数倒序再用一遍，同时只修改当前最高位的元素，从低到高求解
+
+  ```java
+  class Solution {
+      public List<Integer> grayCode(int n) {
+          List<Integer> res=new ArrayList<Integer>();
+          res.add(0);
+          for(int i = 0; i < n; i++){
+              for(int k = res.size() - 1; k >= 0; k--) {
+                  res.add(res.get(k) | 1 << i);
+              }
+          }
+          return res;
+      }
+  }
+  ```
+
+### 953. Verifying an Alien Dictionary(Easy)
+
+- 题意：外星文字使用小写字母但是字母顺序不同，给定字符串数组，判断其是否按照字典序升序
+- 解法：构造新的字母大小映射关系，重新实现比较算法
+
+### 279. Perfect Squares(Medium)
+
+- 题意：每个数字都可以只由平方数相加组成，求出最少要多少个平方数才能得到的给定n
+
+- 解法：使用动态规划求解
+
+  ```java
+  class Solution {
+      public int numSquares(int n) {
+          int[] dp = new int[n + 1];
+          return getNum(n, dp);
+      }
+      
+      private int getNum(int n, int[] dp) {
+          if(dp[n] > 0) {
+              return dp[n];
+          }
+          int max_square = (int)Math.sqrt(n);
+          if(max_square * max_square == n) {
+              dp[n] = 1;
+              return 1;
+          }
+          int min = n;
+          for(int i = max_square; i > 0; i--) {
+              int res = 1;
+              int temp = n - i * i;
+              res += getNum(temp, dp);
+              min = Math.min(res, min);
+          }
+          dp[n] = min;
+          return min;
+      }
+  }
+  ```
+
+### 215. Kth Largest Element in an Array(Medium)
+
+- 题意：求出数组中第k大的元素
+
+- 解法：快排的基本思想，从大到小排序，每次都能确认划分的前面元素一定比后面元素大，按照个数再选择对哪边排序
+
+  ```java
+  class Solution {
+      public int findKthLargest(int[] nums, int k) {
+          int low = 0;
+          int high = nums.length - 1;
+          while(true) {
+              int mid = partition(nums, low, high);
+              if(mid + 1 == k) {
+                  return nums[mid];
+              } else if(mid + 1 > k) {
+                  high = mid - 1;
+              } else {
+                  low = mid + 1;
+              }
+          }
+      }
+      
+      private int partition(int[] a, int low, int high) {
+          int base = a[low];
+          while(low < high) {
+              while(low < high && a[high] <= base) high--;
+              a[low] = a[high];
+              while(low < high && a[low] >= base) low++;
+              a[high] = a[low];
+          }
+          a[low] = base;
+          return low;
+      }
+  }
+  ```
+
+### 888. Fair Candy Swap(Easy)
+
+- 题意：给定两个数组，交换一次元素使得两数组和相等(保证有解)
+
+- 解法：先分别求出两个数组的元素和，根据其中的差别求出相差n，然后就转化为求出两个相差n的元素，可以使用set来求
+
+  ```java
+  class Solution {
+      public int[] fairCandySwap(int[] A, int[] B) {
+          int sum_a = 0;
+          for(int a: A) {
+              sum_a += a;
+          }
+          int sum_b = 0;
+          HashSet<Integer> set = new HashSet();
+          for(int b: B) {
+              sum_b += b;
+              set.add(b);
+          }
+          int n = (sum_a + sum_b) / 2 - sum_a;
+          for(int a: A) {
+              if(set.contains(a + n)) {
+                  return new int[]{a, a + n};
+              }
+          }
+          return new int[2];
+      }
+  }
+  ```
+
+### 445. Add Two Numbers II(Medium)
+
+- 题意：给定两个链表，按照十进制从高位到低位存储数字，实现链表的加法
+- 解法：通过链表反转可以保证低位先加，然后再实现链表加法，最后将结果反转回来
+
+### 629. K Inverse Pairs Array(Hard)
+
+- 题意：给定n和k，求出前n个正整数所有排列中刚好有k个逆序对的排列数
+
+- 解法：动态规划，先只考虑第n大正整数，如果放在最后则提供了0个逆序对，放在倒数第二个位置则提供了一个逆序对，以此类推，放在第一个位置提供了n-1个逆序对，所以剩下的逆序对要在前n-1个正整数里面找，得到递归式dp\[n][k] = dp\[n-1][k]+dp\[n-1][k-1]+dp\[n-1][k-2]+…+dp\[n-1][k+1-n+1]+dp\[n-1][k-n+1]，再继续约简得到dp\[n][k+1] = dp\[n][k]+dp\[n-1][k+1]-dp\[n-1][k+1-n]
+
+  > 需要注意数组越界和数字大小问题
+
+  ```java
+  class Solution {
+      public int kInversePairs(int n, int k) {
+          int mod = 1000000007;
+          if (k > n * (n - 1) / 2 || k < 0) {
+              return 0;
+          }
+          if (k == 0 || k == n * (n - 1) / 2) {
+              return 1;   
+          }
+          long[][] dp = new long[n + 1][k + 1];
+          dp[2][0] = 1;
+          dp[2][1] = 1;
+          for (int i = 3; i <= n; i++) {
+              dp[i][0] = 1;
+              for (int j = 1; j <= Math.min(k, i * (i - 1) / 2); j++) {
+                  dp[i][j] = dp[i][j - 1] + dp[i - 1][j];
+                  if (j >= i) {
+                      dp[i][j] -= dp[i - 1][j - i];
+                  }
+                  dp[i][j] = (dp[i][j] + mod) % mod;
+              }
+          }
+          return (int)dp[n][k];
+      }
+  }
+  ```
+
+### 477. Total Hamming Distance(Medium)
+
+- 题意：给定数组，求出数组所有数字对的海明距离之和
+
+- 解法：总共32位，分别对每一位求出海明距离，每次判断当前数字某位是否为1，再给结果加上前面的1的数目或者0的数目
+
+  ```java
+  class Solution {
+      public int totalHammingDistance(int[] nums) {
+          int res = 0;
+          int temp = 1;
+          for(int j = 0; j < 32; j++) {
+              int count = 0;
+              for(int i = 0; i < nums.length; i++) {
+                  if((temp & nums[i]) > 0) {
+                      res += i - count;
+                      count++;
+                  } else {
+                      res += count;
+                  }
+              }
+              temp <<= 1;
+          }
+          return res;
+      }
+  }
+  ```
+
+### 542. 01 Matrix(Medium)
+
+- 题意：给定01矩阵，对每个位置求出该元素到0的最小距离
+
+- 解法1：使用bfs
+
+  ```java
+  public class Solution {
+      public int[][] updateMatrix(int[][] matrix) {
+          int m = matrix.length;
+          int n = matrix[0].length;
+          
+          Queue<int[]> queue = new LinkedList<>();
+          for (int i = 0; i < m; i++) {
+              for (int j = 0; j < n; j++) {
+                  if (matrix[i][j] == 0) {
+                      queue.offer(new int[] {i, j});
+                  }
+                  else {
+                      matrix[i][j] = Integer.MAX_VALUE;
+                  }
+              }
+          }
+          
+          int[][] dirs = {{-1, 0}, {1, 0}, {0, -1}, {0, 1}};
+          
+          while (!queue.isEmpty()) {
+              int[] cell = queue.poll();
+              for (int[] d : dirs) {
+                  int r = cell[0] + d[0];
+                  int c = cell[1] + d[1];
+                  if (r < 0 || r >= m || c < 0 || c >= n || 
+                      matrix[r][c] <= matrix[cell[0]][cell[1]] + 1) continue;
+                  queue.add(new int[] {r, c});
+                  matrix[r][c] = matrix[cell[0]][cell[1]] + 1;
+              }
+          }
+          
+          return matrix;
+      }
+  }
+  ```
+
+- 解法2：动态规划走两遍，一遍从左上角走起，一遍从右下角走起
+
+  ```java
+  public int[][] updateMatrix(int[][] matrix) {
+      if (matrix.length == 0 || matrix[0].length == 0) {
+          return matrix;
+      }
+      int[][] dis = new int[matrix.length][matrix[0].length];
+      int range = matrix.length * matrix[0].length;
+      
+      for (int i = 0; i < matrix.length; i++) {
+          for (int j = 0; j < matrix[0].length; j++) {
+              if (matrix[i][j] == 0) {
+                  dis[i][j] = 0;
+              } else {
+                  int upCell = (i > 0) ? dis[i - 1][j] : range;
+                  int leftCell = (j > 0) ? dis[i][j - 1] : range;
+                  dis[i][j] = Math.min(upCell, leftCell) + 1;
+              }
+          }
+      }
+      
+      for (int i = matrix.length - 1; i >= 0; i--) {
+          for (int j = matrix[0].length - 1; j >= 0; j--) {
+              if (matrix[i][j] == 0) {
+                  dis[i][j] = 0;
+              } else {
+                  int downCell = (i < matrix.length - 1) ? dis[i + 1][j] : range;
+                  int rightCell = (j < matrix[0].length - 1) ? dis[i][j + 1] : range;
+                  dis[i][j] = Math.min(Math.min(downCell, rightCell) + 1, dis[i][j]);
+              }
+          }
+      }
+      
+      return dis;
+  }
+  ```
+
+### 316. Remove Duplicate Letters(Hard)
+
+- 题意：给定字符串，求出字符串中由所有不同字母组成的最小字典序子序列
+
+- 解法1：贪心法，在保证后面字符串包括其他所有独特字符的前提下，每次找到当前最小字符，使用递归求解
+
+  ```java
+  public String removeDuplicateLetters(String s) {
+          int[] cnt = new int[26];
+          int pos = 0; // the position for the smallest s[i]
+          for (int i = 0; i < s.length(); i++) cnt[s.charAt(i) - 'a']++;
+          for (int i = 0; i < s.length(); i++) {
+              if (s.charAt(i) < s.charAt(pos)) pos = i;
+              if (--cnt[s.charAt(i) - 'a'] == 0) break;
+          }
+          return s.length() == 0 ? "" : s.charAt(pos) + removeDuplicateLetters(s.substring(pos + 1).replaceAll("" + s.charAt(pos), ""));
+      }
+  ```
+
+- 解法2：观察问题，发现最后求出的字符串一定符合原来的顺序，只是位置可能不是相邻的，联想到栈的顺序性，所以可以使用栈来保存，如果能保证后面序列中还有当前栈顶元素才允许弹栈，所以也要先记录元素个数
+
+  ```java
+      public String removeDuplicateLetters(String s) {
+          Stack<Character> stack = new Stack<>();
+          int[] count = new int[26];
+          char[] arr = s.toCharArray();
+          for(char c : arr) {
+              count[c-'a']++;
+          }
+          boolean[] visited = new boolean[26];
+          for(char c : arr) {
+              count[c-'a']--;
+              if(visited[c-'a']) {
+                  continue;
+              }
+              while(!stack.isEmpty() && stack.peek() > c && count[stack.peek()-'a'] > 0) {
+                  visited[stack.peek()-'a'] = false;
+                  stack.pop();
+              }
+              stack.push(c);
+              visited[c-'a'] = true;
+          }
+          StringBuilder sb = new StringBuilder();
+          for(char c : stack) {
+              sb.append(c);
+          }
+          return sb.toString();
+      }
+  ```
+
+### 598. Range Addition II(Easy)
+
+- 题意：给定m，n表示全为0的m*n矩阵，给定很多个数对[i，j]使得矩阵坐标在数对左上角的元素+1，求出最后矩阵最大元素对应的数字个数有多少
+
+- 解法：因为每次左上角都会+1，所以只要求出最小的有效数对围成的范围即可
+
+  ```java
+  class Solution {
+      public int maxCount(int m, int n, int[][] ops) {
+          int min_x = m;
+          int min_y = n;
+          for(int i = 0; i < ops.length; i++) {
+              if(ops[i][0] > 0 && ops[i][1] > 0) {
+                  min_x = Math.min(min_x, ops[i][0]);
+                  min_y = Math.min(min_y, ops[i][1]);
+              }
+          }
+          return min_x * min_y;
+      }
+  }
+  ```
+
+### 717. 1-bit and 2-bit Characters(Easy)
+
+- 题意：给定01编码数组作为字符串，数组一定以0为结尾，每个字符可以由1个元素0或者两个字符10、11组成，判断字符串最后一个元素是否只由1个元素组成
+
+- 解法：倒着看，找出最后一个0前有多少个1，如果有奇数个1说明最后一定是10，如果是偶数个则说明最后是110
+
+  ```java
+  class Solution {
+      public boolean isOneBitCharacter(int[] bits) {
+          for(int i = bits.length - 2; i >= 0; i--) {
+              if(bits[i] == 0) {
+                  return (bits.length - 2 - i) % 2 == 0;
+              }
+          }
+          return (bits.length - 1) % 2 == 0;
+      }
+  }
+  ```
+
+### 219. Contains Duplicate II(Easy)
+
+- 题意：给定数组nums和k，判断nums中是否有两个相等的元素其下标差不超过k
+- 解法1：使用map记住元素上一次下标
+- 解法2：使用一个大小为k的set
+
+### 720. Longest Word in Dictionary(Easy)
+
+- 题意：求出字符串数组中最长的可以由字符一个一个拼接起来的字符串，拼接过程中的字符串也都必须在数组中
+
+- 解法：先进行排序，然后将有效字符串存起来
+
+  ```java
+  class Solution {
+      public String longestWord(String[] words) {
+          Arrays.sort(words);
+          HashSet<String> set = new HashSet();
+          String res = "";
+          for(String word: words) {
+              if(word.length() == 1 || set.contains(word.substring(0, word.length() - 1))) {
+                  set.add(word);
+                  if(res.length() < word.length()) {
+                      res = word;
+                  }
+              }
+          }
+          return res;
+      }
+  }
+  ```
+
+### 795. Number of Subarrays with Bounded Maximum(Medium)
+
+- 题意：求出最大值在给定界限内的子数组的数目
+
+- 解法：分为三种情况，当前值在界限内，当前值小于界限，当前值大于界限，由于子数组的连续性，所以可以使用滑动窗口求解，求出加入当前值的所有有效子数组数目可以通过窗口大小来求出
+
+  ```java
+  class Solution {
+      public int numSubarrayBoundedMax(int[] A, int L, int R) {
+          int start = 0;
+          int count = 0;
+          int res = 0;
+          for(int i = 0; i < A.length; i++) {
+              if(A[i] >= L && A[i] <= R) {
+                  res += i - start + 1;
+                  count = i - start + 1;
+              }
+              else if(A[i] < L) {
+                  res += count;
+              }
+              else {
+                  start = i + 1;
+                  count = 0;
+              }
+          }
+          return res;
+      }
+  }
+  ```
+
+### 876. Middle of the Linked List(Easy)
+
+- 题意：求出链表的中间节点(偶数个则输出后一个)
+
+- 解法：使用快慢指针
+
+  ```java
+  class Solution {
+      public ListNode middleNode(ListNode head) {
+          ListNode fast = head;
+          ListNode slow = head;
+          while(fast != null && fast.next != null) {
+              fast = fast.next.next;
+              slow = slow.next;
+          }
+          return slow;
+      }
+  }
+  ```
+
+### 767. Reorganize String(Medium)
+
+- 题意：给定字符串，将其重排列为所有相邻字符不同的字符串，如果不存在则返回空串
+
+- 解法1：对字符串字符进行计数，并将对应字符编码存到计数数组中，然后排序，最后构造字符串
+
+  ```java
+  class Solution {
+      public String reorganizeString(String S) {
+          int[] letters = new int[26];
+          for(char s: S.toCharArray()) {
+              letters[s-'a'] += 100;
+          }
+          for(int i = 0; i < letters.length; i++) {
+              letters[i] += i;
+          }
+          
+          Arrays.sort(letters);
+          char[] res = new char[S.length()];
+          int index = 1;
+          for(int code: letters) {
+              int num = code / 100;
+              char letter = (char)(code % 100 + 'a');
+              if(num > (S.length() + 1) / 2) {
+                  return "";
+              }
+              for(int i = 0; i < num; i++) {
+                  if(index >= S.length()) {
+                      index = 0;
+                  }
+                  res[index] = letter;
+                  index += 2;
+              }
+          }
+          return String.valueOf(res);
+      }
+  }
+  ```
+
+- 解法2：贪心法，每次都将当前字符数最多的两个字符放入结果中，这样可以保证符合字符交替的规则，可以使用堆来实现
+
+  ```java
+  class Solution {
+      public String reorganizeString(String S) {
+          int N = S.length();
+          int[] count = new int[26];
+          for (char c: S.toCharArray()) count[c-'a']++;
+          PriorityQueue<MultiChar> pq = new PriorityQueue<MultiChar>((a, b) ->
+              a.count == b.count ? a.letter - b.letter : b.count - a.count);
+  
+          for (int i = 0; i < 26; ++i) if (count[i] > 0) {
+              if (count[i] > (N + 1) / 2) return "";
+              pq.add(new MultiChar(count[i], (char) ('a' + i)));
+          }
+  
+          StringBuilder ans = new StringBuilder();
+          while (pq.size() >= 2) {
+              MultiChar mc1 = pq.poll();
+              MultiChar mc2 = pq.poll();
+              /*This code turns out to be superfluous, but explains what is happening
+              if (ans.length() == 0 || mc1.letter != ans.charAt(ans.length() - 1)) {
+                  ans.append(mc1.letter);
+                  ans.append(mc2.letter);
+              } else {
+                  ans.append(mc2.letter);
+                  ans.append(mc1.letter);
+              }*/
+              ans.append(mc1.letter);
+              ans.append(mc2.letter);
+              if (--mc1.count > 0) pq.add(mc1);
+              if (--mc2.count > 0) pq.add(mc2);
+              }
+          }
+  
+          if (pq.size() > 0) ans.append(pq.poll().letter);
+          return ans.toString();
+      }
+  }
+  class MultiChar {
+      int count;
+      char letter;
+      MultiChar(int ct, char ch) {
+          count = ct;
+          letter = ch;
+      }
+  }
+  ```
+
+### 214. Shortest Palindrome(Hard)
+
+- 题意：给定字符串s，可以在s前面加字符，求这样形成的最短回文串
+
+- 解法1：使用指针法，分奇偶讨论
+
+  ```java
+  class Solution {
+      public String shortestPalindrome(String s) {
+          int N = s.length();
+          String res_1 = "";
+          for(int i = (N - 1) / 2; i >= 0; i--) {
+              int l = i - 1;
+              int h = i + 1;
+              while(l >= 0) {
+                  if(s.charAt(l) == s.charAt(h)) {
+                      l--;
+                      h++;
+                  } else {
+                      break;
+                  }
+              }
+              if(l < 0) {
+                  StringBuilder sb = new StringBuilder();
+                  for(int j = N - 1; j >= h; j--) {
+                      sb.append(s.charAt(j));
+                  }
+                  sb.append(s);
+                  res_1 = sb.toString();
+                  break;
+              }
+          }
+          String res_2 = "";
+          for(int i = N / 2; i >= 0; i--) {
+              int l = i - 1;
+              int h = i;
+              while(l >= 0) {
+                  if(s.charAt(l) == s.charAt(h)) {
+                      l--;
+                      h++;
+                  } else {
+                      break;
+                  }
+              }
+              if(l < 0) {
+                  StringBuilder sb = new StringBuilder();
+                  for(int j = N - 1; j >= h; j--) {
+                      sb.append(s.charAt(j));
+                  }
+                  sb.append(s);
+                  res_2 = sb.toString();
+                  break;
+              }
+          }
+          return res_1.length() > res_2.length() ? res_2 : res_1;
+      }
+  }
+  ```
+
+- 解法2：关键是要求出从第一个字符开始的最长回文子串，将字符串翻转为rs，即求一个从s第一个字符开始的子串与到rs最后一个字符的子串的最长串，将s和rs拼接，使用KMP算法的索引数组，就变成了求最后一个字符的索引位置，注意要保证索引位置在字符串的前一半位置
+
+  >c a  t a c b # b c a  t a c
+  >
+  >0 0 0 0 1 0 0 0 1 2 3 4 5
+
+  ```java
+  class Solution {
+      public String shortestPalindrome(String s) {
+          String temp = s + "#" + new StringBuilder(s).reverse().toString();
+          int[] table = getTable(temp);
+          return new StringBuilder(s.substring(table[table.length - 1] + 1)).reverse().toString() + s;
+      }
+  
+      public int[] getTable(String s){
+          int[] next = new int[s.length()];
+          next[0] = -1;
+          int j = 0;
+          int k = -1;
+          while(j < s.length() - 1) {
+            if(k == -1 || s.charAt(j) == s.charAt(k)) {
+              //说明j之前与k之前的所有字符都一样
+              next[++j] = ++k;
+            } else {
+              //否则k返回上个位置
+              k = next[k];
+            }
+          }
+          return next;
+      }
+  }
+  ```
+
+### 1005. Maximize Sum Of Array After K Negations(Easy)
+
+- 题意：给定数组A，将数组中某一元素取相反数并进行K次，求数组和的最大值
+
+- 解法1：暴力解决，先排序，然后将负数取反，如果还剩下奇数次则再排序将最小的元素取反
+
+- 解法2：鉴于每次都是对最小的元素进行处理，可以使用优先队列来维护，每次都将队列首元素取反再放回队列中重复K次
+
+  ```java
+  public int largestSumAfterKNegations(int[] A, int K) {
+    PriorityQueue<Integer> pq = new PriorityQueue<Integer>();
+  
+    for(int x: A) pq.add(x);
+    while( K-- > 0) pq.add(-pq.poll());
+  
+    int sum = 0;
+    for(int i = 0; i < A.length; i++){
+      sum += pq.poll();
+    }
+    return sum;
+  }
+  ```
+
+### 835. Image Overlap(Medium)
+
+- 题意：给定两个二维01数组，可以对数组进行平移操作，平移后两个数组必须完全一样，求最后数组中最多有多少个1
+
+- 解法：由于数组A每个位置的元素都可能映射到数组B的任意位置上去，因此需要按照位置来判断是否重叠，先用两个list存所有1的位置，然后计算出位置之间的距离即平移操作的距离，这样就计算出了所有平移操作得到的1的个数
+
+  ```java
+  class Solution {
+      public int largestOverlap(int[][] A, int[][] B) {
+          int N = A.length;
+          List<Integer> LA = new ArrayList<>();
+          List<Integer> LB = new ArrayList<>();
+          HashMap<Integer, Integer> count = new HashMap<>();
+          for (int i = 0; i < N * N; ++i) 
+              if (A[i / N][i % N] == 1) 
+                  LA.add(i / N * 100 + i % N);
+          for (int i = 0; i < N * N; ++i) 
+              if (B[i / N][i % N] == 1) 
+                  LB.add(i / N * 100 + i % N);
+        
+          for (int i : LA)
+              for (int j : LB)
+                  count.put(i - j, count.getOrDefault(i - j, 0) + 1);
+          int res = 0;
+          for (int i : count.values()) 
+              res = Math.max(res, i);
+          return res;
+      }
+  }
+  ```
+
+### 453. Minimum Moves to Equal Array Elements(Easy)
+
+- 题意：给定长度为n的数组，将其中n-1个元素都+1视为一个操作，求最少经过多少次操作可以让数组元素都相等
+- 解法：每次n-1个元素都+1其实就等价于有1个元素-1了，所以只要求所有元素到数组最小值的距离即可
+
+### 462. Minimum Moves to Equal Array Elements II(Medium)
+
+- 题意：给定数组，每次可以给一个元素+1或者-1，求最少经过多少次操作可以让数组元素都相等
+
+- 解法：考虑最后都变成mid，那么就是mid - nums[0] + nums[n-1] - mid，这样就不需要算出mid了，直接nums[n-1]-nums[0]，因此转化为了两点相遇的问题，这个mid实际就是中位数了
+
+  ```java
+  class Solution {
+      public int minMoves2(int[] nums) {
+          Arrays.sort(nums);
+          int i = 0;
+          int j = nums.length - 1;
+          int res = 0;
+          while(i < j) {
+              res += nums[j] - nums[i];
+              i++;
+              j--;
+          }
+          return res;
+      }
+  }
+  ```
+
+### 850. Rectangle Area II(Hard)
+
+- 题意：给定矩形数组，包括矩形的左下坐标和右上坐标，求矩形数组的覆盖面积
+
+- 解法1：使用容斥原理，超时
+
+- 解法2：将横纵坐标***压缩***，排序后使用bitmap来解决，计算面积时解压
+
+  ```java
+  class Solution {
+      public int rectangleArea(int[][] rectangles) {
+          int N = rectangles.length;
+          Set<Integer> Xvals = new HashSet();
+          Set<Integer> Yvals = new HashSet();
+  
+          for (int[] rec: rectangles) {
+              Xvals.add(rec[0]);
+              Xvals.add(rec[2]);
+              Yvals.add(rec[1]);
+              Yvals.add(rec[3]);
+          }
+  
+          Integer[] imapx = Xvals.toArray(new Integer[0]);
+          Arrays.sort(imapx);
+          Integer[] imapy = Yvals.toArray(new Integer[0]);
+          Arrays.sort(imapy);
+  
+          Map<Integer, Integer> mapx = new HashMap();
+          Map<Integer, Integer> mapy = new HashMap();
+          for (int i = 0; i < imapx.length; ++i)
+              mapx.put(imapx[i], i);
+          for (int i = 0; i < imapy.length; ++i)
+              mapy.put(imapy[i], i);
+  
+          boolean[][] grid = new boolean[imapx.length][imapy.length];
+          for (int[] rec: rectangles)
+              for (int x = mapx.get(rec[0]); x < mapx.get(rec[2]); ++x)
+                  for (int y = mapy.get(rec[1]); y < mapy.get(rec[3]); ++y)
+                      grid[x][y] = true;
+  
+          long ans = 0;
+          for (int x = 0; x < grid.length; ++x)
+              for (int y = 0; y < grid[0].length; ++y)
+                  if (grid[x][y])
+                      ans += (long) (imapx[x+1] - imapx[x]) * (imapy[y+1] - imapy[y]);
+  
+          ans %= 1_000_000_007;
+          return (int) ans;
+      }
+  }
+  ```
+
+- 解法3：直线扫描，按照纵坐标从小到大进行扫描，每个矩形都有两个操作(下方加入和上方移除)，将这两个操作记录，进行排序，然后按照顺序进行操作，将加入操作对应的横坐标区间放到active数组记录，然后就是合并区间数组求面积了
+
+  ```java
+  class Solution {
+      public int rectangleArea(int[][] rectangles) {
+          int OPEN = 0, CLOSE = 1;
+          int[][] events = new int[rectangles.length * 2][];
+          int t = 0;
+          for (int[] rec: rectangles) {
+              events[t++] = new int[]{rec[1], OPEN, rec[0], rec[2]};
+              events[t++] = new int[]{rec[3], CLOSE, rec[0], rec[2]};
+          }
+  
+          Arrays.sort(events, (a, b) -> Integer.compare(a[0], b[0]));
+  
+          List<int[]> active = new ArrayList();
+          int cur_y = events[0][0];
+          long ans = 0;
+          for (int[] event: events) {
+              int y = event[0], typ = event[1], x1 = event[2], x2 = event[3];
+  
+              // Calculate query
+              long query = 0;
+              int cur = -1;
+              for (int[] xs: active) {
+                  cur = Math.max(cur, xs[0]);
+                  query += Math.max(xs[1] - cur, 0);
+                  cur = Math.max(cur, xs[1]);
+              }
+  
+              ans += query * (y - cur_y);
+  
+              if (typ == OPEN) {
+                  active.add(new int[]{x1, x2});
+                  Collections.sort(active, (a, b) -> Integer.compare(a[0], b[0]));
+              } else {
+                  for (int i = 0; i < active.size(); ++i)
+                      if (active.get(i)[0] == x1 && active.get(i)[1] == x2) {
+                          active.remove(i);
+                          break;
+                      }
+              }
+  
+              cur_y = y;
+          }
+  
+          ans %= 1_000_000_007;
+          return (int) ans;
+      }
+  }
+  ```
+
+- 解法4：类似解法3的思想，将加入移除和合并区间的操作用[线段树](https://www.cnblogs.com/xiaoyao24256/p/6590885.html)来解决
+
+  ```java
+  class Solution {
+      public int rectangleArea(int[][] rectangles) {
+          int OPEN = 1, CLOSE = -1;
+          int[][] events = new int[rectangles.length * 2][];
+          Set<Integer> Xvals = new HashSet();
+          int t = 0;
+          for (int[] rec: rectangles) {
+              events[t++] = new int[]{rec[1], OPEN, rec[0], rec[2]};
+              events[t++] = new int[]{rec[3], CLOSE, rec[0], rec[2]};
+              Xvals.add(rec[0]);
+              Xvals.add(rec[2]);
+          }
+  
+          Arrays.sort(events, (a, b) -> Integer.compare(a[0], b[0]));
+  
+          Integer[] X = Xvals.toArray(new Integer[0]);
+          Arrays.sort(X);
+          Map<Integer, Integer> Xi = new HashMap();
+          for (int i = 0; i < X.length; ++i)
+              Xi.put(X[i], i);
+  
+          Node active = new Node(0, X.length - 1, X);
+          long ans = 0;
+          long cur_x_sum = 0;
+          int cur_y = events[0][0];
+  
+          for (int[] event: events) {
+              int y = event[0], typ = event[1], x1 = event[2], x2 = event[3];
+              ans += cur_x_sum * (y - cur_y);
+              cur_x_sum = active.update(Xi.get(x1), Xi.get(x2), typ);
+              cur_y = y;
+  
+          }
+  
+          ans %= 1_000_000_007;
+          return (int) ans;
+      }
+  }
+  
+  class Node {
+      int start, end;
+      Integer[] X;
+      Node left, right;
+      int count;
+      long total;
+  
+      public Node(int start, int end, Integer[] X) {
+          this.start = start;
+          this.end = end;
+          this.X = X;
+          left = null;
+          right = null;
+          count = 0;
+          total = 0;
+      }
+  
+      public int getRangeMid() {
+          return start + (end - start) / 2;
+      }
+  
+      public Node getLeft() {
+          if (left == null) left = new Node(start, getRangeMid(), X);
+          return left;
+      }
+  
+      public Node getRight() {
+          if (right == null) right = new Node(getRangeMid(), end, X);
+          return right;
+      }
+  
+      public long update(int i, int j, int val) {
+          if (i >= j) return 0;
+          if (start == i && end == j) {
+              count += val;
+          } else {
+              getLeft().update(i, Math.min(getRangeMid(), j), val);
+              getRight().update(Math.max(getRangeMid(), i), j, val);
+          }
+  
+          if (count > 0) total = X[end] - X[start];
+          else total = getLeft().total + getRight().total;
+  
+          return total;
+      }
+  }
+  ```
+
+### 792. Number of Matching Subsequences(Medium)
+
+- 题意：给定字符串S和字符串数组words，求出words中有多少个是S的子序列
+- 解法1：暴力一个一个判断
+- 解法2：由于题中字符只包含小写字母，所以可以同时判断words里面所有的词是否符合规则，按照当前需要的字符使用数组分别保存，最后不需要字符的字符串数就是[结果](https://leetcode.com/problems/number-of-matching-subsequences/discuss/117634/Efficient-and-simple-go-through-words-in-parallel-with-explanation)
+
+### 1002. Find Common Characters(Easy)
+
+- 题意：给定字符串数组，求出所有公共字符，可以重复
+- 解法：由于字符只由小写字母组成，因此可以使用二维数组来计数，然后求出每个字符的最小计数值，再按照该值加入结果即可
+
+### 350. Intersection of Two Arrays II(Easy)
+
+- 题意：给定两个数组，求出所有公共元素，可重复
+- 解法：使用hashmap记住第一个数组中每个元素值的个数，然后遍历第二个数组时要保证元素值个数不能大于第一个数组中map记住的值
+
+### 988. Smallest String Starting From Leaf(Medium)
+
+- 题意：给定二叉树，结点表示字符，求出从叶子节点开始到根结束的最小字典序字符串
+
+- 解法：使用深度遍历求出每一个字符串，找到最小的
+
+  > 该题不能使用分治法，因为是从叶子节点开始的，所以兄弟节点间所处的字符串位置可能不一样
+  >
+  > 深度遍历时需要保证结果是从叶子节点开始的
+
+  ```java
+  class Solution {
+      public String smallestFromLeaf(TreeNode root) {
+          dfs(root, "");
+          return res;
+      }
+      
+      String res = "";
+      private void dfs(TreeNode root, String temp) {
+          if(root == null) {
+              return;
+          }
+          if(root.left == null && root.right == null) {
+              temp = (char)(root.val + 'a') + temp;
+              if(res.equals("")) {
+                  res = temp;
+              } else if(!temp.equals("") && temp.compareTo(res) < 0) {
+                  res = temp;
+              }
+              return;
+          }
+          dfs(root.left, (char)(root.val + 'a') + temp);
+          dfs(root.right, (char)(root.val + 'a') + temp);
+      }
+  }
+  ```
+
+### 99. Recover Binary Search Tree(Hard)
+
+- 题意：给定二叉搜索树，里面有两个结点交换了，将该树进行修复
+
+- 解法：使用中序遍历，这样就相当于修复一个有序数组中的逆序对了，只有两种情况，即逆序对相邻与否
+
+  > 使用深度搜索，有好多种情况，如两个结点是祖先和子孙关系、兄弟关系、没有关系只有公共祖先，讨论不过来
+
+  ```java
+  class Solution {
+      public void recoverTree(TreeNode root) {
+          inorder(root);
+          if(three == null) {
+              swap(one, two);
+          } else {
+              swap(one, four);
+          }
+      }
+      
+      TreeNode one = null;
+      TreeNode two = null;
+      TreeNode three = null;
+      TreeNode four = null;
+      TreeNode pre = new TreeNode(Integer.MIN_VALUE);
+      private void inorder(TreeNode root) {
+          if(root == null) {
+              return;
+          }
+          inorder(root.left);
+          if(pre.val > root.val) {
+              if(one == null) {
+                  one = pre;
+                  two = root;
+              } else {
+                  three = pre;
+                  four = root;
+              }
+          }
+          pre = root;
+          inorder(root.right);
+      }
+      
+      private void swap(TreeNode a, TreeNode b) {
+          int val = a.val;
+          a.val = b.val;
+          b.val = val;
+      }
+  }
+  ```
+
+### 221. Maximal Square(Medium)
+
+- 题意：给定01二维数组，求出数组中全部由1组成的最大正方形面积
+
+- 解法1：求出最大的长方形就求出了最大的正方形，所以可以参考第85题最大长方形的解法
+
+- 解法2：动态规划，dp[i, j]表示以i，j点为右下角的最大正方形边长
+
+  >dp\[i][j] = min(dp\[i][j - 1], dp\[i - 1][j], dp\[i - 1][j - 1]) + 1
+  >
+  >由于实际上dp数组只由上一行的元素和上一个元素来决定，所以可以只存储上一行元素数组，减少空间复杂度
+
+  ```java
+  public class Solution {
+      public int maximalSquare(char[][] matrix) {
+          int rows = matrix.length, cols = rows > 0 ? matrix[0].length : 0;
+          int[][] dp = new int[rows + 1][cols + 1];
+          int maxsqlen = 0;
+          for (int i = 1; i <= rows; i++) {
+              for (int j = 1; j <= cols; j++) {
+                  if (matrix[i-1][j-1] == '1'){
+                      dp[i][j] = Math.min(Math.min(dp[i][j - 1], dp[i - 1][j]), dp[i - 1][j - 1]) + 1;
+                      maxsqlen = Math.max(maxsqlen, dp[i][j]);
+                  }
+              }
+          }
+          return maxsqlen * maxsqlen;
+      }
+  }
+  ```
+
+### 730. Count Different Palindromic Subsequences(Hard)
+
+- 题意：求出字符串中不同非空回文子序列的数目
+
+- 解法：使用动态规划
+
+  >s.charAt(i) != s.charAt(j):  dp\[i][j] = dp\[i][j - 1] + dp\[i + 1][j] - dp\[i + 1][j - 1]
+  >
+  >s.charAt(i) != s.charAt(j):  很多种情况，需要保证去重复
+
+  ```java
+  class Solution {
+      public int countPalindromicSubsequences(String s) {
+          int len = s.length();
+          int[][] dp = new int[len][len];
+  
+          char[] chs = s.toCharArray();
+          for(int i = 0; i < len; i++){
+              dp[i][i] = 1;   // Consider the test case "a", "b" "c"...
+          }
+  
+          for(int distance = 1; distance < len; distance++){
+              for(int i = 0; i < len - distance; i++){
+                  int j = i + distance;
+                  if(chs[i] == chs[j]){
+                      int low = i + 1;
+                      int high = j - 1;
+  
+                /* Variable low and high here are used to get rid of the duplicate*/
+  
+                      while(low <= high && chs[low] != chs[j]){
+                          low++;
+                      }
+                      while(low <= high && chs[high] != chs[j]){
+                          high--;
+                      }
+                      if(low > high){
+                          // consider the string from i to j is "a...a" "a...a"... where there is no character 'a' inside the leftmost and rightmost 'a'
+                         /* eg:  "aba" while i = 0 and j = 2:  dp[1][1] = 1 records the palindrome{"b"}, 
+                           the reason why dp[i + 1][j  - 1] * 2 counted is that we count dp[i + 1][j - 1] one time as {"b"}, 
+                           and additional time as {"aba"}. The reason why 2 counted is that we also count {"a", "aa"}. 
+                           So totally dp[i][j] record the palindrome: {"a", "b", "aa", "aba"}. 
+                           */ 
+  
+                          dp[i][j] = dp[i + 1][j - 1] * 2 + 2;  
+                      } 
+                      else if(low == high){
+                          // consider the string from i to j is "a...a...a" where there is only one character 'a' inside the leftmost and rightmost 'a'
+                         /* eg:  "aaa" while i = 0 and j = 2: the dp[i + 1][j - 1] records the palindrome {"a"}.  
+                           the reason why dp[i + 1][j  - 1] * 2 counted is that we count dp[i + 1][j - 1] one time as {"a"}, 
+                           and additional time as {"aaa"}. the reason why 1 counted is that 
+                           we also count {"aa"} that the first 'a' come from index i and the second come from index j. So totally dp[i][j] records {"a", "aa", "aaa"}
+                          */
+                          dp[i][j] = dp[i + 1][j - 1] * 2 + 1;  
+                      }
+                      else{
+                          // consider the string from i to j is "a...a...a... a" where there are at least two character 'a' close to leftmost and rightmost 'a'
+                         /* eg: "aacaa" while i = 0 and j = 4: the dp[i + 1][j - 1] records the palindrome {"a",  "c", "aa", "aca"}. 
+                            the reason why dp[i + 1][j  - 1] * 2 counted is that we count dp[i + 1][j - 1] one time as {"a",  "c", "aa", "aca"}, 
+                            and additional time as {"aaa",  "aca", "aaaa", "aacaa"}.  Now there is duplicate :  {"aca"}, 
+                            which is removed by deduce dp[low + 1][high - 1]. So totally dp[i][j] record {"a",  "c", "aa", "aca", "aaa", "aaaa", "aacaa"}
+                            */
+                          dp[i][j] = dp[i + 1][j - 1] * 2 - dp[low + 1][high - 1]; 
+                      }
+                  }
+                  else{
+                      dp[i][j] = dp[i][j - 1] + dp[i + 1][j] - dp[i + 1][j - 1];  //s.charAt(i) != s.charAt(j)
+                  }
+                  dp[i][j] = dp[i][j] < 0 ? dp[i][j] + 1000000007 : dp[i][j] % 1000000007;
+              }
+          }
+  
+          return dp[0][len - 1];
+      }
+  }
+  ```
+
+### 560. Subarray Sum Equals K(Medium)
+
+- 题意：给定数组nums，求出其子数组和为k的数目
+
+- 解法1：求出所有可能的和
+
+- 解法2：sum[i]表示从0~i子数组的和，若sum[j] - sum[i] == k，则说明子数组i~j符合条件，先求出所有sum[i]，然后就转化为了数组两数之差的问题，可以使用hashmap来解决，需要先把0放入map中保证sum-0的情况
+
+  ```java
+  public class Solution {
+      public int subarraySum(int[] nums, int k) {
+          int count = 0, sum = 0;
+          HashMap<Integer, Integer> map = new HashMap<>();
+          map.put(0, 1);
+          for (int i = 0; i < nums.length; i++) {
+              sum += nums[i];
+              if (map.containsKey(sum - k))
+                  count += map.get(sum - k);
+              map.put(sum, map.getOrDefault(sum, 0) + 1);
+          }
+          return count;
+      }
+  }
+  ```
+
+### 763. Partition Labels(Medium)
+
+- 题意：给定字符串，将其划分为子串，两个子串间没有相同的字符，求划分最多子串的划分方法
+
+- 解法1：求出每种字符的起始和终止位置，然后区间合并
+
+- 解法2：求出每种字符的终止位置，然后再遍历一遍求出区间
+
+  ```java
+  class Solution {
+      public List<Integer> partitionLabels(String S) {
+          int[] last = new int[26];
+          for (int i = 0; i < S.length(); ++i)
+              last[S.charAt(i) - 'a'] = i;
+          
+          int j = 0, anchor = 0;
+          List<Integer> ans = new ArrayList();
+          for (int i = 0; i < S.length(); ++i) {
+              j = Math.max(j, last[S.charAt(i) - 'a']);
+              if (i == j) {
+                  ans.add(i - anchor + 1);
+                  anchor = i + 1;
+              }
+          }
+          return ans;
+      }
+  }
+  ```
+
+### 496. Next Greater Element I(Easy)
+
+- 题意：给定不重复数组，求出数组一个子集每个元素在原数组中下一个比它大的元素
+
+- 解法：求出每个元素下一个更大的元素即可，可以使用栈保存前面没有求出来的元素，这是一个递减子序列
+
+  > 如[9,8,7,3,2,1,6]，先把[9,8,7,3,2,1]入栈，遇到6再把[1,2,3]出栈
+
+  ```java
+  class Solution {
+      public int[] nextGreaterElement(int[] findNums, int[] nums) {
+          Map<Integer, Integer> map = new HashMap<>(); // map from x to next greater element of x
+          Stack<Integer> stack = new Stack<>();
+          for (int num : nums) {
+              while (!stack.isEmpty() && stack.peek() < num)
+                  map.put(stack.pop(), num);
+              stack.push(num);
+          }   
+          for (int i = 0; i < findNums.length; i++)
+              findNums[i] = map.getOrDefault(findNums[i], -1);
+          return findNums;
+      }
+  }
+  ```
+
+### 556. Next Greater Element III(Medium)
+
+- 题意：给定32位正数n，求出由n中数字组成的比n大的最小数字，如果没有返回-1
+
+- 解法：先求出n的从个位开始的逆序列，逆序列到第len-i位，然后求出逆序列中刚好比第len-i+1位的数更大的数，将其和len-i位交换，然后逆序列倒序即
+
+  > 可以方便地将数字n转化为char数组
+
+  ```java
+  public class Solution {
+      public int nextGreaterElement(int n) {
+          char[] number = (n + "").toCharArray();
+          
+          int i, j;
+          // I) Start from the right most digit and 
+          // find the first digit that is
+          // smaller than the digit next to it.
+          for (i = number.length-1; i > 0; i--)
+              if (number[i-1] < number[i])
+                 break;
+  
+          // If no such digit is found, its the edge case 1.
+          if (i == 0)
+              return -1;
+              
+           // II) Find the smallest digit on right side of (i-1)'th 
+           // digit that is greater than number[i-1]
+          int x = number[i-1], smallest = i;
+          for (j = i+1; j < number.length; j++)
+              if (number[j] > x && number[j] <= number[smallest])
+                  smallest = j;
+              else
+                  break;
+          
+          // III) Swap the above found smallest digit with 
+          // number[i-1]
+          swap(number, i-1, smallest);
+          
+          // IV) Sort the digits after (i-1) in ascending order
+          int start = i;
+          int end = number.length - 1;
+          while(start < end) {
+              swap(number, start++, end--);
+          }
+          
+          long val = Long.parseLong(new String(number));
+          return (val <= Integer.MAX_VALUE) ? (int) val : -1;
+      }
+      
+      private void swap(char[] number, int a, int b) {
+          char temp = number[a];
+          number[a] = number[b];
+          number[b] = temp;
+      }
+  }
+  ```
+
+### 10. ZigZag Conversion(Medium)
+
+- 题意：求出字符串未重复字母的最长子串
+- 解法：使用滑动窗口求解
+
+### 10. ZigZag Conversion(Medium)
+
+- 题意：求出字符串未重复字母的最长子串
+- 解法：使用滑动窗口求解
+
+### 10. ZigZag Conversion(Medium)
+
+- 题意：求出字符串未重复字母的最长子串
+- 解法：使用滑动窗口求解
+
+### 10. ZigZag Conversion(Medium)
+
+- 题意：求出字符串未重复字母的最长子串
+- 解法：使用滑动窗口求解
+
+### 10. ZigZag Conversion(Medium)
+
+- 题意：求出字符串未重复字母的最长子串
+- 解法：使用滑动窗口求解
+
+### 10. ZigZag Conversion(Medium)
+
+- 题意：求出字符串未重复字母的最长子串
+- 解法：使用滑动窗口求解
+
+### 10. ZigZag Conversion(Medium)
+
+- 题意：求出字符串未重复字母的最长子串
+- 解法：使用滑动窗口求解
+
+### 10. ZigZag Conversion(Medium)
+
+- 题意：求出字符串未重复字母的最长子串
+- 解法：使用滑动窗口求解
+
+### 10. ZigZag Conversion(Medium)
+
+- 题意：求出字符串未重复字母的最长子串
+- 解法：使用滑动窗口求解
 
 ### 10. ZigZag Conversion(Medium)
 
