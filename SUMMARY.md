@@ -5543,6 +5543,433 @@ class Solution {
   }
   ```
 
+### 814. Binary Tree Pruning(Medium)
+
+- 题意：给定01二叉树，将所有只包含0的子树移除
+- 解法：从子树到根，所以使用后序遍历
+
+### 405. Convert a Number to Hexadecimal(Easy)
+
+- 题意：给定32位整数，将其转化为16进制输出
+
+- 解法：使用移位运算
+
+  ```java
+  public class Solution {
+      char[] map = {'0','1','2','3','4','5','6','7','8','9','a','b','c','d','e','f'};
+      public String toHex(int num) {
+          if(num == 0) return "0";
+          String result = "";
+          while(num != 0){
+              result = map[(num & 15)] + result; 
+              num = (num >>> 4);
+          }
+          return result;
+      }
+  }
+  ```
+
+### 136. Single Number(Easy)
+
+- 题意：给定数组，所有数字都出现两次，只有一个数字只出现一次，找到这个数
+- 解法：使用异或特性求解
+
+### 137. Single Number II(Medium)
+
+- 题意：给定数组，所有数字都出现三次，只有一个数字只出现一次，找到这个数
+
+- 解法：这种问题的解法使用有限状态自动机，这里总共有三种状态(出现1次、2次、3次)来记录当前的状态
+
+  > State    temp    next
+  >
+  >   0 0          1         0 1
+  >
+  >   0 1	      1         1 0
+  >
+  >   1 0          1         0 0
+  >
+  > 遇到temp=0则状态不变，由此推出求next的等式
+
+  ```java
+  class Solution {
+      public int singleNumber(int[] nums) {
+          int a = 0;
+          int b = 0;
+          for(int num: nums) {
+              int ta = a;
+              a = (~a&b&num) + (a&~num);
+              b = (~ta&~b&num) + (b&~num);
+          }
+          return b;
+      }
+  }
+  ```
+
+### 260. Single Number III(Medium)
+
+- 题意：给定数组，数组中每个数字都出现两次，只有两个不同的数字只出现一次，求出这两个数字
+
+- 解法：将整个数组分为两组，分别异或求出数字
+
+  > 假设这两个数字为a，b
+  >
+  > 首先求出整个数组的异或即a ^ b
+  >
+  > 然后可以得到a和b之间第i位的bit不同，构造出n = 2^i
+  >
+  > 通过判断当前数字num&n是否为0来进行分组
+
+  ```java
+  class Solution {
+      public int[] singleNumber(int[] nums) {
+          int a = 0;
+          for(int num: nums) {
+              a ^= num;
+          }
+          int n = 1;
+          while(a % 2 == 0) {
+              a >>= 1;
+              n <<= 1;
+          }
+          int x = 0;
+          int y = 0;
+          for(int num: nums) {
+              if((n & num) == 0) {
+                  x ^= num;
+              } else {
+                  y ^= num;
+              }
+          }
+          return new int[]{x, y};
+      }
+  }
+  ```
+
+### 79. Word Search(Medium)
+
+- 题意：给定二维字符数组board和单词word，通过邻接的字符连起来组成单词，判断word是否能在board中找到
+- 解法：使用dfs
+
+### 212. Word Search II(Medium)
+
+- 题意：给定二维字符数组board和单词数组words，通过邻接的字符连起来组成单词，返回能在board中找到words中的单词列表
+
+- 解法：和上题类似，这里可以使用字典树来避免重复
+
+  ```java
+  class Solution {
+      public List<String> findWords(char[][] board, String[] words) {
+          List<String> res = new ArrayList<>();
+          TrieNode root = buildTrie(words);
+          for (int i = 0; i < board.length; i++) {
+              for (int j = 0; j < board[0].length; j++) {
+                  dfs (board, i, j, root, res);
+              }
+          }
+          return res;
+      }
+  
+      public void dfs(char[][] board, int i, int j, TrieNode p, List<String> res) {
+          char c = board[i][j];
+          if (c == '#' || p.next[c - 'a'] == null) return;
+          p = p.next[c - 'a'];
+          if (p.word != null) {   // found one
+              res.add(p.word);
+              p.word = null;     // de-duplicate
+          }
+  
+          board[i][j] = '#';
+          if (i > 0) dfs(board, i - 1, j ,p, res); 
+          if (j > 0) dfs(board, i, j - 1, p, res);
+          if (i < board.length - 1) dfs(board, i + 1, j, p, res); 
+          if (j < board[0].length - 1) dfs(board, i, j + 1, p, res); 
+          board[i][j] = c;
+      }
+  
+      public TrieNode buildTrie(String[] words) {
+          TrieNode root = new TrieNode();
+          for (String w : words) {
+              TrieNode p = root;
+              for (char c : w.toCharArray()) {
+                  int i = c - 'a';
+                  if (p.next[i] == null) p.next[i] = new TrieNode();
+                  p = p.next[i];
+             }
+             p.word = w;
+          }
+          return root;
+      }
+  
+      class TrieNode {
+          TrieNode[] next = new TrieNode[26];
+          String word;
+      }
+  }
+  ```
+
+### 127. Word Ladder(Medium)
+
+- 题意：给定起始词beginWord和终止词endWord和词表wordList，将起始词每次修改一个字符，最后变成终止词，转换中的词都必须在词表里面，求出转换序列的最小长度
+
+- 解法：求最小长度可以使用广度优先遍历，维护一个reached集合表示当前可以得到的词，同时wordDict集合表示当前还没用过的词，求出当前词所能转换出的所有词并判断是否在wordDict中，如果在则从wordDict中移除并加入下一个reached中
+
+  ```java
+  class Solution {
+      public int ladderLength(String beginWord, String endWord, List<String> wordList) {
+          HashSet<String> wordDict = new HashSet<String>();
+          for(String word: wordList) {
+              wordDict.add(word);
+          }
+          Set<String> reached = new HashSet<String>();
+          reached.add(beginWord);
+          int distance = 1;
+          while (!reached.contains(endWord)) {
+              Set<String> toAdd = new HashSet<String>();
+              for (String each: reached) {
+                  for (int i = 0; i < each.length(); i++) {
+                      char[] chars = each.toCharArray();
+                      for (char ch = 'a'; ch <= 'z'; ch++) {
+                          chars[i] = ch;
+                          String word = new String(chars);
+                          if (wordDict.contains(word)) {
+                              toAdd.add(word);
+                              wordDict.remove(word);
+                          }
+                      }
+                  }
+              }
+              distance++;
+              if (toAdd.size() == 0) return 0;
+              reached = toAdd;
+          }
+          return distance;
+      }
+  }
+  ```
+
+### 390. Elimination Game(Medium)
+
+- 题意：给定n，在1~n中移除数字，从左至右每隔1个移除1个数字，到最右边再从右至左每隔1个移除1个数字，求出最后剩下那个数字
+
+- 解法：只要维护一个开头数字head，根据移除规则更新head，最后剩下的数字一定为head，关键是什么时候更新head
+
+  > When will head be updated?
+  >
+  > - if we move from left
+  > - if we move from right and the total remaining number % 2 == 1
+  >   like 2 4 6 8 10, we move from 10, we will take out 10, 6 and 2, head is deleted and move to 4
+  >   like 2 4 6 8 10 12, we move from 12, we will take out 12, 8, 4, head is still remaining 2
+
+  ```java
+  class Solution {  
+      public int lastRemaining(int n) {
+          boolean left = true;
+          int remaining = n;
+          int step = 1;
+          int head = 1;
+          while (remaining > 1) {
+              if (left || remaining % 2 ==1) {
+                  head = head + step;
+              }
+              remaining = remaining / 2;
+              step = step * 2;
+              left = !left;
+          }
+          return head;
+      }
+  }
+  ```
+
+### 686. Repeated String Match(Easy)
+
+- 题意：给定字符串A和B，将A重复k次，使B成为A的子串，求最小的k
+
+- 解法：根据A和B的长度来求出总字符串
+
+  ```java
+  class Solution {
+       public int repeatedStringMatch(String A, String B) {
+          int count = 0;
+          StringBuilder sb = new StringBuilder();
+          while (sb.length() < B.length()) {
+              sb.append(A);
+              count++;
+          }
+          if(sb.toString().contains(B)) return count;
+          if(sb.append(A).toString().contains(B)) return ++count;
+          return -1;
+      }
+  }
+  ```
+
+### 1071. Greatest Common Divisor of Strings(Easy)
+
+- 题意：定义字符串的除法，求两个字符串的最大公约串
+
+- 解法：类似于最大公约数的求法，字符串使用更相减损法更好
+
+  ```java
+  class Solution {
+      public String gcdOfStrings(String str1, String str2) {
+          String longStr = str1.length() < str2.length() ? str2 : str1;
+          String shortStr = str1.length() < str2.length() ? str1 : str2;
+          String temp = strSubtract(longStr, shortStr);
+          while(temp != null && !temp.equals("")) {
+              longStr = shortStr.length() < temp.length() ? temp : shortStr;
+              shortStr = shortStr.length() < temp.length() ? shortStr : temp;
+              temp = strSubtract(longStr, shortStr);
+          }
+          return temp != null ? shortStr : "";
+      }
+      
+      private String strSubtract(String str1, String str2) {
+          for(int i = 0; i < str2.length(); i++) {
+              if(str1.charAt(i) != str2.charAt(i)) {
+                  return null;
+              }
+          }
+          return str1.substring(str2.length());
+      }
+  }
+  ```
+
+### 134. Gas Station(Medium)
+
+- 题意：有n个加油站组成一个环，起始没油，从第i个加油站开始，加gas[i]油，到第i+1个加油站消耗cost[i]油，求出能到达所有加油站的起始加油站下标，如果不能返回-1
+
+- 解法：gas的和不小于cost的和即有解，找到最大的部分和即可求解
+
+  >找到最小部分和即找到最大部分和
+  >
+  >gas[0]-cost[0]+gas[1]-cost[1]+...+gas[i]-cost[i]最小，这样可以保证 
+  >
+  >gas[i+1]-cost[i+1]>=0
+  >
+  >gas[i+1]-cost[i+1]+gas[i+2]-cost[i+2]>=0
+  >
+  >…...
+  >
+  >gas[i+1]-cost[i+1]+gas[i+2]-cost[i+2]+...+gas[n-1]-cost[n-1]>=0
+
+  ```c++
+  class Solution {
+  public:
+      int canCompleteCircuit(vector<int>& gas, vector<int>& cost) {
+          int n = gas.size();
+          int total(0), subsum(INT_MAX), start(0);
+          for(int i = 0; i < n; ++i){
+              total += gas[i] - cost[i];
+              if(total < subsum) {
+                  subsum = total;
+                  start = i + 1;
+              }
+          }
+          return (total < 0) ?  -1 : (start%n); 
+      }
+  };
+  ```
+
+### 153. Find Minimum in Rotated Sorted Array(Medium)
+
+- 题意：旋转有序数组的某一部分，求出新数组的最小值，类似33题和154题
+
+- 解法：二分法，关键是搞清楚mid和start、end元素的关系
+
+  ```java
+  class Solution {
+      public int findMin(int[] nums) {
+          int start = 0;
+          int end = nums.length - 1;
+          while(start < end) {
+              int mid = (start + end) / 2;
+              if(nums[mid] > nums[end]) {
+                  start = mid + 1;
+              } else {
+                  end = mid;
+              }
+          }
+          return nums[end];
+      }
+  }
+  ```
+
+### 154. Find Minimum in Rotated Sorted Array II(Hard)
+
+- 题意：旋转有序数组的某一部分，求出新数组的最小值，数组元素可能重复
+
+- 解法：与153不同的是，如果mid和end元素相等的话，那么无法确定最小元素的位置
+
+  ```c++
+  class Solution {
+  public:
+      int findMin(vector<int> &num) {
+          int lo = 0;
+          int hi = num.size() - 1;
+          int mid = 0;
+          
+          while(lo < hi) {
+              mid = lo + (hi - lo) / 2;
+              if (num[mid] > num[hi]) {
+                  lo = mid + 1;
+              } else if (num[mid] < num[hi]) {
+                  hi = mid;
+              } else { // when num[mid] and num[hi] are same
+                  hi--;
+              }
+          }
+          return num[lo];
+      }
+  };
+  ```
+
+### 915. Partition Array into Disjoint Intervals(Medium)
+
+- 题意：给定数组，将数组拆为两个部分，左边的所有元素不大于右边的所有元素，求出左边元素的最小个数
+
+- 解法：即左边最大元素不大于右边最小元素，使用max和min两个数组记住每个位置对应的最大最小值
+
+  ```java
+  class Solution {
+      public int partitionDisjoint(int[] A) {
+          int[] max = new int[A.length];
+          int[] min = new int[A.length];
+          max[0] = A[0];
+          min[A.length - 1] = A[A.length - 1];
+          for(int i = 1; i < A.length; i++) {
+              max[i] = Math.max(max[i - 1], A[i]);
+          }
+          for(int i = A.length - 2; i >= 0; i--) {
+              min[i] = Math.min(min[i + 1], A[i]);
+          }
+          for(int i = 1; i < A.length; i++) {
+              if(min[i] >= max[i - 1]) {
+                  return i;
+              }
+          }
+          return 0;
+      }
+  }
+  ```
+
+- 解法2：更深地考虑到，如果左边数组中的A[i] > 后面的某一个A[j]，那么这个A[j]一定也属于左边数组，例如32，57，24，19，48，67中32 > 19，所以从32到19的所有元素一定在左边，其中57最大，此时57 > 48，所以48也在左边
+
+  ```java
+      public int partitionDisjoint(int[] A) {
+          int maxUntilI = A[0];	//当前最大值
+          int leftPartitionMax=A[0]; //左边的当前最大值
+          int partitionSpot = 0;	//划分点
+          for(int i=1;i<A.length;i++){
+              maxUntilI =Math.max(maxUntilI, A[i]) ;
+              if(A[i]<leftPartitionMax){
+                  leftPartitionMax=maxUntilI;
+                  partitionSpot =i;
+              }            
+          }
+          return partitionSpot+1;
+      }
+  ```
+
+
 ### 10. ZigZag Conversion(Medium)
 
 - 题意：求出字符串未重复字母的最长子串
@@ -5603,23 +6030,4 @@ class Solution {
 - 题意：求出字符串未重复字母的最长子串
 - 解法：使用滑动窗口求解
 
-### 10. ZigZag Conversion(Medium)
-
-- 题意：求出字符串未重复字母的最长子串
-- 解法：使用滑动窗口求解
-
-### 10. ZigZag Conversion(Medium)
-
-- 题意：求出字符串未重复字母的最长子串
-- 解法：使用滑动窗口求解
-
-### 10. ZigZag Conversion(Medium)
-
-- 题意：求出字符串未重复字母的最长子串
-- 解法：使用滑动窗口求解
-
-### 10. ZigZag Conversion(Medium)
-
-- 题意：求出字符串未重复字母的最长子串
-- 解法：使用滑动窗口求解
-
+# END
