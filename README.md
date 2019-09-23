@@ -18,15 +18,15 @@
 
 9.java中int数组初始化后默认的值为0，而Integer等引用数据类型的默认值为null，在动态规划算法中可以利用这点
 
-10.求最值问题，如果与顺序相关，那么可以换种思路：遍历求出最值+动态规划(**分治**)，如[312题扎气球](https://leetcode.com/problems/burst-balloons/)
+10.求最值问题，如果与顺序相关，那么可以换种思路：遍历求出最值+动态规划(**分治**)，如[312题扎气球](https://leetcode.com/problems/burst-balloons/)和[375题猜数字](https://leetcode.com/problems/guess-number-higher-or-lower-ii/)
 
-11.给定了固定的n个整数，要将其按照某种顺序排好，可以考虑使用索引形成环，然后环中元素交换来分解环，并以此来排序，如[765题数字相邻](<https://leetcode.com/problems/couples-holding-hands/>)和[数学归纳法证明](<https://leetcode.com/problems/couples-holding-hands/discuss/113362/JavaC%2B%2B-O(N)-solution-using-cyclic-swapping>)
+11.给定了固定的n个整数，要将其按照某种顺序排好，可以考虑使用索引形成环，然后环中元素交换来分解环，并以此来排序，如[765题数字相邻](<https://leetcode.com/problems/couples-holding-hands/>)和[数学归纳法证明](<https://leetcode.com/problems/couples-holding-hands/discuss/113362/JavaC%2B%2B-O(N)-solution-using-cyclic-swapping>)。更一般的，如果数组的元素与数组的索引相关（比如数组长为n且数组元素都在1-n之间），可以通过数组索引链的方法来做（即当前元素值=下一个索引值），并且可以联想到链表环的快慢指针法，如[287找重复元素](https://leetcode.com/problems/find-the-duplicate-number/)
 
 12.**二叉搜索树在中序遍历下有顺序**，可以直接当做一个有序序列来看待，如[501题找二叉搜索树的众数](<https://leetcode.com/problems/find-mode-in-binary-search-tree/>)，很多关于二叉搜索树的问题都可以变成**有序数组**的问题，如[99题修复二叉搜索树](https://leetcode.com/problems/recover-binary-search-tree/)
 
 13.遇到数学问题相关的一定要先推导出公式再动手编码，如[829题连续正整数和](<https://leetcode.com/problems/consecutive-numbers-sum/solution/>)
 
-14.广度优先搜索可以保证***最小长度***，用在地图着色、倒水等问题，比如[854题求字符串的相似度](<https://leetcode.com/problems/k-similar-strings/>)
+14.广度优先搜索可以保证***最小长度***，用在地图着色、倒水等问题，比如[854题求字符串的相似度](<https://leetcode.com/problems/k-similar-strings/>)。如果与广度的顺序无关，只有最终结果有关的话，也可以不用队列而用递归来实现，只需要将层数当做参数，如[102二叉树层次遍历](https://leetcode.com/problems/binary-tree-level-order-traversal/)
 
 15.动态规划：最值问题，尽可能接近，匹配问题，一般都是将题目中提到的东西当做下标
 
@@ -53,3 +53,9 @@
 21.如果需要对一个二元组排序，可以考虑将二元编码为一元，然后排序，如char、int可以编码为(char - 'a') + int * 100
 
 22.多个字符串的查找匹配可以使用字典树来减少重复查找，如[212单词查找](https://leetcode.com/problems/word-search-ii/)
+
+23.数字low-high之间的平均数是low+(high-low)/2，而不是(high+low)/2，因为后者可能会溢出
+
+24.遇到一类问题，求最坏情况的最优解法，可以使用动态规划来保存局部最优解，同时使用递归来求动态规划数组（思路更清晰），如[375猜数字的代价](https://leetcode.com/problems/guess-number-higher-or-lower-ii/)
+
+25.

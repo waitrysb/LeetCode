@@ -1,6 +1,6 @@
-#顺序版前65题
+# 顺序版前65题
 
-###1.Two Sum(Easy)
+### 1.Two Sum(Easy)
 
 * 题意：给定数组和一个数字S，求出数组中两个数，其和为S
 
@@ -4104,6 +4104,42 @@ class Solution {
   }
   ```
 
+* 解法4：维护两个数组，分别表示该元素左边的最小值和右边的最大值，然后用两个指针分别表示最小值和最大值从最左边走到最右边，途中更新最大间隔
+
+  ```java
+  class Solution {
+      public int maxWidthRamp(int[] A) {
+          int n=A.length;
+          if(n==1){
+              return 0;
+          }
+          int[] lmin=new int[n];
+          int[] rmax=new int[n];
+          lmin[0]=A[0];
+          for(int i=1;i<n;i++){
+              lmin[i]=Math.min(lmin[i-1],A[i]);
+          }
+          rmax[n-1]=A[n-1];
+          for(int i=n-2;i>=0;i--){
+              rmax[i]=Math.max(rmax[i+1],A[i]);
+          }
+          int sp=0;
+          int ep=0;
+          int max=0;
+          while(ep<n){
+              if(lmin[sp]<=rmax[ep]){
+                  // Since, it is valid.We update the length.
+                  max=Math.max(max,ep-sp);
+                  ep++;
+              }else{
+                  sp++;
+              }
+          }
+          return max;
+      }
+  }
+  ```
+
 ### 524. Longest Word in Dictionary through Deleting(Medium)
 
 - 题意：给定字符串s和字符串数组d，找到d中最长中字典序最小的能通过s删掉一些字符得到的字符串
@@ -5969,6 +6005,169 @@ class Solution {
       }
   ```
 
+### 375. Guess Number Higher or Lower II(Medium)
+
+- 题意：给定数字n，从1-n中选一个数字，每次猜数字i会消耗i代价，返回higher或lower，问在最坏的情况下，最少需要消耗多少代价
+
+- 解法：这是一类问题，最坏情况最优解法，通常使用动态规划+递归来做
+
+  ```java
+  class Solution {
+      private int[][] memo;
+      
+      public int getMoneyAmount(int n) {
+          memo = new int[n + 1][n + 1];
+          return minCost(1, n);
+      }
+      
+      private int minCost(int lo, int hi) {
+          if (lo >= hi) return 0;
+          
+          if (memo[lo][hi] != 0) return memo[lo][hi];
+          
+          int minTotal = Integer.MAX_VALUE;
+          for (int i = lo; i <= hi; i++) {
+              minTotal = Math.min(minTotal, i + Math.max(minCost(lo, i - 1), minCost(i + 1, hi)));
+          }
+          memo[lo][hi] = minTotal;
+          return minTotal;
+      }
+  }
+  ```
+
+### 169. Majority Element(Easy)
+
+```java
+class Solution {
+    //给定数组，求出数组中出现次数大于n/2的元素
+    //由于该元素出现次数大于n/2，所以每次遇到该元素就可以将另一个元素抵消掉
+    //这样思路就是：记录一个元素，每次遇到另一个不同元素则计数-1，每次遇到相同元素则计数+1，每当计数为0时重新记录一个元素，最后记录的元素一定就是要找的元素
+    public int majorityElement(int[] nums) {
+        int num = nums[0];
+        int count = 1;
+        for(int i = 1; i < nums.length; i++) {
+            if(num == nums[i]) {
+                count++;
+            } else if(count == 1) {
+                num = nums[++i];
+            } else {
+                count--;
+            }
+        }
+        return num;
+    }
+}
+```
+
+### 102. Binary Tree Level Order Traversal(Medium)
+
+```java
+class Solution {
+    //二叉树的层次遍历
+    //可以使用队列来保存下一层的元素
+    //也可以直接用递归来传递节点的层数
+    public List<List<Integer>> levelOrder(TreeNode root) {
+        List<List<Integer>> levelOrder = new ArrayList<>();
+        levelOrderHelper(root, levelOrder, 0);
+        return levelOrder;
+    }
+
+    public void levelOrderHelper(TreeNode node, List<List<Integer>> levelOrder, int level) {
+        if (node == null) {
+            return;
+        }
+        if (level >= levelOrder.size()) {
+            levelOrder.add(new ArrayList<Integer>());
+        }
+        //将该节点加入到对应层的结果中
+        levelOrder.get(level).add(node.val);
+
+        levelOrderHelper(node.left, levelOrder, level + 1);
+        levelOrderHelper(node.right, levelOrder, level + 1);
+    }
+}
+```
+
+### 287. Find the Duplicate Number(Medium)
+
+```java
+class Solution {
+    //数组的元素在1-n之间，共n+1个元素，找到数组中的一个重复元素
+    //不允许修改数组和申请On辅助空间，并且这个重复数字可能重复多次
+    //通过二分法统计区间中数字的个数来判断该重复数字
+    //剑指offer上的
+    
+    //解法2：该题本来可以通过交换数组元素来解决，但是要求不能修改数组，这种方法的本质与数组的索引相关，所以可以通过数组索引链的方法，即当前元素值=下一个索引值
+    //问题就转化为了寻找这个链里面的环的起始点
+    
+    public int findDuplicate(int[] nums) {
+        // Find the intersection point of the two runners.
+        int tortoise = nums[0];
+        int hare = nums[0];
+        do {
+            tortoise = nums[tortoise];
+            hare = nums[nums[hare]];
+        } while (tortoise != hare);
+
+        // Find the "entrance" to the cycle.
+        //这里ptr2先走了一段环前的路和两个环
+        //所以ptr1也要走一段环前的路
+        //这样ptr1和ptr2一定会在环起点相遇
+        int ptr1 = nums[0];
+        int ptr2 = tortoise;
+        while (ptr1 != ptr2) {
+            ptr1 = nums[ptr1];
+            ptr2 = nums[ptr2];
+        }
+        return ptr1;
+    }
+}
+```
+
+### 10. ZigZag Conversion(Medium)
+
+- 题意：求出字符串未重复字母的最长子串
+- 解法：使用滑动窗口求解
+
+### 10. ZigZag Conversion(Medium)
+
+- 题意：求出字符串未重复字母的最长子串
+- 解法：使用滑动窗口求解
+
+### 10. ZigZag Conversion(Medium)
+
+- 题意：求出字符串未重复字母的最长子串
+- 解法：使用滑动窗口求解
+
+### 10. ZigZag Conversion(Medium)
+
+- 题意：求出字符串未重复字母的最长子串
+- 解法：使用滑动窗口求解
+
+### 10. ZigZag Conversion(Medium)
+
+- 题意：求出字符串未重复字母的最长子串
+- 解法：使用滑动窗口求解
+
+### 10. ZigZag Conversion(Medium)
+
+- 题意：求出字符串未重复字母的最长子串
+- 解法：使用滑动窗口求解
+
+### 10. ZigZag Conversion(Medium)
+
+- 题意：求出字符串未重复字母的最长子串
+- 解法：使用滑动窗口求解
+
+### 10. ZigZag Conversion(Medium)
+
+- 题意：求出字符串未重复字母的最长子串
+- 解法：使用滑动窗口求解
+
+### 10. ZigZag Conversion(Medium)
+
+- 题意：求出字符串未重复字母的最长子串
+- 解法：使用滑动窗口求解
 
 ### 10. ZigZag Conversion(Medium)
 
