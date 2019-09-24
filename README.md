@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 # Strategy
 
 1.求**子串**或者**平台（子数组）**等连续子集问题或者**有序数字对（需要先排序）**一般可以使用滑动窗口，如[第3题无重复字母最长子串](https://leetcode.com/problems/longest-substring-without-repeating-characters/)和[第424题最长重复字符替换子串](https://leetcode.com/problems/longest-repeating-character-replacement/)和[532题距离为k的数字对](https://leetcode.com/problems/k-diff-pairs-in-an-array/)
