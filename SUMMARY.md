@@ -4393,6 +4393,8 @@ class Solution {
 
 - 解法：快排的基本思想，从大到小排序，每次都能确认划分的前面元素一定比后面元素大，按照个数再选择对哪边排序
 
+- 也可以使用堆排序来做，k个元素的大根堆
+
   ```java
   class Solution {
       public int findKthLargest(int[] nums, int k) {
@@ -6124,10 +6126,41 @@ class Solution {
 }
 ```
 
-### 10. ZigZag Conversion(Medium)
+### 324. Wiggle Sort II(Medium)
 
-- 题意：求出字符串未重复字母的最长子串
-- 解法：使用滑动窗口求解
+- 题意：给定无序数组，将其排为`nums[0] < nums[1] > nums[2] < nums[3]...`
+
+- 解法：先划分为大小两部分，然后两边取，要减小空间复杂度就要考虑两边取的下标映射关系
+
+  ```java
+  class Solution {
+      /*
+      方法1， 最简单的做法, 排序，然后两边取
+      方法2, 先找到数组的中位数，用类似于215 find largest kth的方法，然后把小于中位数的放左边，大于的放右边，然后两边取，space complexity O(n)
+      方法3， 要达到空间复杂度为O(1)，将nums数组的下标x通过函数idx()从[0, 1, 2, ... , n - 1, n] 映射到 [1, 3, 5, ... , 0, 2, 4, ...]，得到新下标ix
+      */
+      public void wiggleSort(int[] nums) {
+          int len = nums.length;
+          int[] bak = Arrays.copyOf(nums, len);
+          Arrays.sort(bak);
+          int mid = (len + 1) / 2;
+          int end = len - 1;
+          mid--;
+  		// corner case  when nums is nums[0:2m]  
+  		// smaller :  len(nums[0:m]=m+1, 
+  		 //  bigger:  len(nums[m+1:2m]=m
+  		//  assigned like nums[m],nums[2m],nums[m-1],nums[2m-1]......  nums[1], nums[m+1] , num[0]
+          for (int i = 0; i < len / 2; i++) {
+              nums[2 * i] = bak[mid--];
+              nums[2 * i + 1] = bak[end--];
+          }
+          // when len(small) - len (big)=1;
+          if (len % 2 != 0) {
+              nums[len - 1] = bak[0];
+          }
+      }
+  }
+  ```
 
 ### 10. ZigZag Conversion(Medium)
 
