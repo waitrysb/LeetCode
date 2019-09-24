@@ -6163,10 +6163,33 @@ class Solution {
   }
   ```
 
-### 10. ZigZag Conversion(Medium)
+### 873. Length of Longest Fibonacci Subsequence(Medium)
 
-- 题意：求出字符串未重复字母的最长子串
-- 解法：使用滑动窗口求解
+- 题意：给定单调递增数组，求出数组中斐波那契子数列的最大长度（只要满足前两项之和等于当前项）
+
+- 解法：可以使用集合暴力求解，也可以使用动态规划
+
+  ```java
+  class Solution {
+      //使用DFS会超时
+      //可以使用集合包里搜索A[i]+A[j]
+      //也可以用动态规划来做，dp数组表示最大长度，不要想太多，不是floyd算法，这里可以通过索引来确定第三项
+      public int lenLongestFibSubseq(int[] A) {
+          int res = 0;
+          int[][] dp = new int[A.length][A.length];
+          Map<Integer, Integer> index = new HashMap<>();
+          for (int j = 0; j < A.length; j++) {
+              index.put(A[j], j);
+              for (int i = 0; i < j; i++) {
+                  int k = index.getOrDefault(A[j] - A[i], -1);
+                  dp[i][j] = (A[j] - A[i] < A[i] && k >= 0) ? dp[k][i] + 1 : 2;
+                  res = Math.max(res, dp[i][j]);
+              }
+          }
+          return res > 2 ? res : 0;
+      }
+  }
+  ```
 
 ### 10. ZigZag Conversion(Medium)
 
