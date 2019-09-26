@@ -6191,10 +6191,30 @@ class Solution {
   }
   ```
 
-### 10. ZigZag Conversion(Medium)
+### 179. Largest Number(Medium)
 
-- 题意：求出字符串未重复字母的最长子串
-- 解法：使用滑动窗口求解
+```java
+class Solution {
+    //给定数组，求出使用所有数组元素可以拼接出的最大数字
+    //给数组自定义排序，排序方法没想到这么简单
+    public String largestNumber(int[] nums) {
+        String[] s = new String[nums.length];
+        for(int i = 0; i < nums.length; i++) {
+            s[i] = String.valueOf(nums[i]);
+        }
+        Arrays.sort(s, (s1, s2)->{
+            return (s2 + s1).compareTo(s1 + s2);
+        });
+        String res = "";
+        for(String temp: s) {
+            res += temp;
+        }
+        int i = 0;
+        while(i < res.length() - 1 && res.charAt(i) == '0') i++;
+        return res.substring(i);
+    }
+}
+```
 
 ### 10. ZigZag Conversion(Medium)
 
