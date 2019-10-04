@@ -58,4 +58,5 @@
 
 24.遇到一类问题，求最坏情况的最优解法，可以使用动态规划来保存局部最优解，同时使用递归来求动态规划数组（思路更清晰），如[375猜数字的代价](https://leetcode.com/problems/guess-number-higher-or-lower-ii/)
 
-25.
+25.重写java中的Arrays.sort参考[179最大拼接数](https://leetcode.com/problems/largest-number/)
+
