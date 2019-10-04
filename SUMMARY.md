@@ -6191,10 +6191,63 @@ class Solution {
   }
   ```
 
-### 10. ZigZag Conversion(Medium)
+### 659. Split Array into Consecutive Subsequences(Medium)
 
-- 题意：求出字符串未重复字母的最长子串
-- 解法：使用滑动窗口求解
+- 题意：将数组拆分为连续的子序列
+
+- 解法：使用两个哈希表（也可以约简为空间复杂度O(1)的算法）：
+
+  哈希表 counter 用于存储元素出现的次数，counter[n] 代表 n 出现的次数
+  哈希表 end 用于存储以元素结尾的连续子序列（指至少包含三个连续整数的子序列）个数，end[n] 代表以 n 结尾的连续子序列的个数
+  过程如下：
+
+  > 遍历数组 nums：
+  >
+  > ​	若元素 n 的出现次数 count[n] == 0：跳过该元素
+  >
+  > ​	count[n] -= 1
+  >
+  > ​	若元素 n 的出现次数 count[n] > 0：
+  > ​		存在以元素 n - 1 结尾的连续子序列，即 end[n - 1] > 0，将元素添加到该子序列的末尾，操作数据：
+  > ​			以 n - 1 结尾的子序列数量减 1：end[n - 1] -= 1
+  > ​			以 n 结尾的子序列数量加 1：end[n] += 1
+  > ​		不存在以元素 n - 1 结尾的连续子序列，此时判断是否能以 n 作为开头构建连续子序列，即判断 counter[n + 1] 与 counter[n + 2] 的值是否均大于 0：
+  > ​			若不能构成：返回 False
+  > ​			若可以构成，操作数据：
+  > ​				n + 1 元素数量减 1：counter[n + 1] -= 1
+  > ​				n + 2 元素数量减 1：counter[n + 2] -= 1
+  > ​				以 n + 2 元素结尾的子序列数量加 1：end[n + 2] += 1
+
+```java
+class Solution {
+    public boolean isPossible(int[] nums) {
+        int start = nums[0];
+        int end = nums[nums.length - 1];
+        int len = end - start + 1;
+        int[] count = new int[len];
+        for(int num: nums) {
+            count[num - start]++;
+        }
+        int[] ends = new int[len];
+        for(int i: nums) {
+            int x = i - start;
+            if(count[x] == 0) continue;
+            count[x]--;
+            if(x > 0 && ends[x-1] > 0) {
+                ends[x-1]--;
+                ends[x]++;
+            } else if((x < len - 2) && count[x+1] > 0 && count[x+2] > 0) {
+                count[x+1]--;
+                count[x+2]--;
+                ends[x+2]++;
+            } else {
+                return false;
+            }
+        }
+        return true;
+    }
+}
+```
 
 ### 10. ZigZag Conversion(Medium)
 
