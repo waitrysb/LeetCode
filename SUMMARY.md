@@ -6191,7 +6191,6 @@ class Solution {
   }
   ```
 
-<<<<<<< HEAD
 ### 659. Split Array into Consecutive Subsequences(Medium)
 
 - 题意：将数组拆分为连续的子序列
@@ -6245,8 +6244,11 @@ class Solution {
                 return false;
             }
         }
-        return true;
-=======
+        return true; 
+    }
+}
+```
+
 ### 179. Largest Number(Medium)
 
 ```java
@@ -6268,25 +6270,70 @@ class Solution {
         int i = 0;
         while(i < res.length() - 1 && res.charAt(i) == '0') i++;
         return res.substring(i);
->>>>>>> 03651a21fdbb527c168907042c2ec9c0b7047d3a
     }
 }
 ```
 
-### 10. ZigZag Conversion(Medium)
+### 123. Best Time to Buy and Sell Stock(Hard)
 
-- 题意：求出字符串未重复字母的最长子串
-- 解法：使用滑动窗口求解
+- 题意：给定数组表示股价，最大可以买入卖出两次，求最大利润
 
-### 10. ZigZag Conversion(Medium)
+  ```java
+  class Solution {
+      //至多能交易两次，所以相当于将整个数组分为两段，分别求最大子段和
+      //解法一，遍历中间位置，分别求出两边数组的最大子段和，并维护一个最大利润，空间复杂度O(n^2)，时间复杂度O(1)
+      //解法二，空间换时间，维护一个向左走最大差数组以及一个向右走最大差数组，两个数组对应和的最大值就是最大利润，时间复杂度O(n)，空间复杂度O(n)
+      public int maxProfit(int[] prices) {
+          if(prices.length <= 1) return 0;
+          int max_profit = 0;
+          int[] left_max_profit = new int[prices.length];
+          int[] right_max_profit = new int[prices.length];
+          int min = prices[0];
+          for(int i = 1; i < prices.length; i++) {
+              min = Math.min(min, prices[i]);
+              left_max_profit[i] = Math.max(left_max_profit[i-1], prices[i] - min);
+          }
+          int max = prices[prices.length - 1];
+          for(int i = prices.length - 2; i >= 0; i--) {
+              max = Math.max(max, prices[i]);
+              right_max_profit[i] = Math.max(right_max_profit[i+1], max - prices[i]);
+          }
+          for(int i = 0; i < prices.length; i++) {
+              max_profit = Math.max(max_profit, left_max_profit[i] + right_max_profit[i]);
+          }
+          return max_profit;
+      }
+  }
+  ```
 
-- 题意：求出字符串未重复字母的最长子串
-- 解法：使用滑动窗口求解
+### 189. Rotate Array(Easy)
 
-### 10. ZigZag Conversion(Medium)
+- 题意：给定数组，将后k个元素移到最前面
 
-- 题意：求出字符串未重复字母的最长子串
-- 解法：使用滑动窗口求解
+- 解法：使用翻转函数，翻转三次
+
+  ```java
+  public class Solution {
+      //剑指offer的类似题目
+      
+      public void rotate(int[] nums, int k) {
+          k %= nums.length;
+          reverse(nums, 0, nums.length - 1);
+          reverse(nums, 0, k - 1);
+          reverse(nums, k, nums.length - 1);
+      }
+      
+      public void reverse(int[] nums, int start, int end) {
+          while (start < end) {
+              int temp = nums[start];
+              nums[start] = nums[end];
+              nums[end] = temp;
+              start++;
+              end--;
+          }
+      }
+  }
+  ```
 
 ### 10. ZigZag Conversion(Medium)
 

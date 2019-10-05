@@ -60,3 +60,5 @@
 
 25.重写java中的Arrays.sort参考[179最大拼接数](https://leetcode.com/problems/largest-number/)
 
+26.遇到关于数组需要比较前后元素的最值问题，可以画出折线图来分析，折线图问题一般可以使用左右数组差来解决，如[123买卖股票3](https://leetcode.com/problems/best-time-to-buy-and-sell-stock-iii/)
+
